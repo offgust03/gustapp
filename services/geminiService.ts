@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import { RewriteTarget } from '../App';
+console.log("DEBUG: Chave de API do Gemini carregada:", import.meta.env.VITE_GEMINI_API_KEY);
 
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
 if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY') {
