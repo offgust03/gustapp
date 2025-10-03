@@ -1,0 +1,43 @@
+
+.visit-history-screen {
+    padding: 20px;
+}
+
+.error-message {
+    color: red;
+}
+
+.visits-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.visit-card {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.visit-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.visit-card-header h2 {
+    font-size: 1.2em;
+    margin: 0;
+}
+
+.visit-card-header p {
+    font-size: 0.9em;
+    color: #666;
+    margin: 0;
+}
+
+.visit-card-body p {
+    margin: 5px 0;
+}

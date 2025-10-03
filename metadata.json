@@ -1,0 +1,7 @@
+{
+  "name": "Revisor de Textos para Saúde",
+  "description": "Uma aplicação de IA para reescrever anotações de visitas domiciliares de saúde em um formato profissional para registros médicos, utilizando a API Gemini.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

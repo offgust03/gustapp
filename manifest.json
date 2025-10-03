@@ -1,0 +1,22 @@
+{
+  "short_name": "Saúde IA",
+  "name": "Assistente de Saúde IA",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#f1f5f9",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#4f46e5",
+  "description": "Ferramentas de IA para otimizar o dia a dia do profissional de saúde."
+}
