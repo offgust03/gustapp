@@ -1,10 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-console.log("DEBUG: Chave de API do Gemini carregada:", import.meta.env.VITE_GEMINI_API_KEY);
-
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-if (!apiKey || apiKey === 'PLACEHOLDER_API_KEY') {
-  throw new Error("VITE_GEMINI_API_KEY is not set or is a placeholder. Please add it to your .env.local file and rebuild the project.");
-}
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
 const ai = new GoogleGenAI(apiKey);
 
 const objectiveInstructions: { [key in RewriteTarget]: string } = {
