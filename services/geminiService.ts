@@ -1,6 +1,23 @@
 import { GoogleGenAI } from "@google/genai";
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
-const ai = new GoogleGenAI(apiKey);
+console.log('--- DEBUG START ---');
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
+console.log('Type of apiKey:', typeof apiKey);
+console.log('Value of apiKey:', apiKey);
+
+let ai;
+try {
+  if (!apiKey) {
+    console.error('API Key is FALSY, not attempting to initialize.');
+    throw new Error("API Key is missing.");
+  }
+  ai = new GoogleGenAI(apiKey);
+  console.log('SDK Initialized SUCCESSFULLY');
+} catch (e) {
+  console.error('SDK Initialization FAILED', e);
+  throw e; // Re-throw the error to ensure the app still fails as before
+}
+console.log('--- DEBUG END ---');
 
 const objectiveInstructions: { [key in RewriteTarget]: string } = {
     'record': `
