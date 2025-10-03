@@ -1,6 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
-// FINAL DEBUG: Hardcoding a fake key to test the SDK constructor itself.
-const ai = new GoogleGenAI("THIS_IS_A_FAKE_KEY");
+const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
+if (!apiKey || apiKey.includes("PLACEHOLDER")) {
+  throw new Error("VITE_GEMINI_API_KEY is not set or is a placeholder. Please add it to your .env.local file and rebuild the project.");
+}
+const ai = new GoogleGenAI(apiKey);
 
 const objectiveInstructions: { [key in RewriteTarget]: string } = {
     'record': `
