@@ -1,5 +1,4 @@
 import { GoogleGenAI } from "@google/genai";
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
 console.log('--- DEBUG START ---');
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
 console.log('Type of apiKey:', typeof apiKey);
