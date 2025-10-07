@@ -1,9 +1,16 @@
-import { GoogleGenAI } from "@google/genai";
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string;
-if (!apiKey || apiKey.includes("PLACEHOLDER")) {
-  throw new Error("VITE_GEMINI_API_KEY is not set or is a placeholder. Please add it to your .env.local file and rebuild the project.");
-}
-const ai = new GoogleGenAI(apiKey);
+import { initializeApp } from 'firebase/app';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { firebaseConfig } from '../src/firebaseConfig';
+
+// --- ATENÇÃO ---
+// Preencha o arquivo `src/firebaseConfig.ts` com os dados do seu projeto Firebase.
+
+// Inicializa o app Firebase
+const app = initializeApp(firebaseConfig);
+const functions = getFunctions(app, 'southamerica-east1');
+
+// Tipos e constantes permanecem os mesmos
+type RewriteTarget = 'record' | 'patient';
 
 const objectiveInstructions: { [key in RewriteTarget]: string } = {
     'record': `
@@ -15,6 +22,22 @@ const objectiveInstructions: { [key in RewriteTarget]: string } = {
       **Tom:** O tom deve ser empático, acolhedor e simplificado. Evite jargões médicos complexos e use uma linguagem que um leigo possa entender facilmente. O objetivo é orientar e informar de forma clara e humana.
     `,
 };
+
+async function generateContent(prompt: string): Promise<string> {
+  const generateContent = httpsCallable(functions, 'generateContent');
+  try {
+    const result = await generateContent({ prompt });
+    const data = result.data as { text?: string; error?: string };
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    return data.text || "";
+  } catch (error) {
+    console.error("Erro ao chamar a Cloud Function:", error);
+    throw new Error("Falha na comunicação com o serviço de IA.");
+  }
+}
+
 
 export async function rewriteText(text: string, target: RewriteTarget): Promise<string> {
   const selectedInstruction = objectiveInstructions[target];
@@ -41,29 +64,15 @@ export async function rewriteText(text: string, target: RewriteTarget): Promise<
 
     ---
     **Texto original para reescrever:**
-    \`\`\`
+    '''
     ${text}
-    \`\`\`
+    '''
     ---
 
     **Texto reescrito (para '${target === 'record' ? 'Prontuário' : 'Paciente'}'):**
   `;
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: prompt,
-    });
-    
-    if (response && response.text) {
-        return response.text.trim();
-    } else {
-        throw new Error("A resposta da API estava vazia ou em formato inesperado.");
-    }
-  } catch (error) {
-    console.error("Erro ao chamar a API Gemini:", error);
-    throw new Error("Falha na comunicação com o serviço de IA.");
-  }
+  return generateContent(prompt);
 }
 
 export async function populateTemplate(
@@ -84,44 +93,23 @@ export async function populateTemplate(
     
     ---
     **Texto Fonte Adicional (Contexto):**
-    \`\`\`
+    '''
     ${sourceText || 'Nenhum texto de contexto fornecido.'}
-    \`\`\`
+    '''
     ---
     **Modelo de Texto para Preencher:**
-    \`\`\`
+    '''
     ${templateContent}
-    \`\`\`
+    '''
     ---
     **Texto Preenchido:**
   `;
 
-  const textPart = { text: prompt };
-  const parts: any[] = [];
-
+  // A lógica de imagem precisa ser ajustada para enviar a imagem para a função de nuvem.
+  // Por enquanto, vamos nos concentrar na parte do texto.
   if (sourceImage) {
-    parts.push({
-      inlineData: {
-        mimeType: sourceImage.mimeType,
-        data: sourceImage.data,
-      },
-    });
+    console.warn("O envio de imagens para a Cloud Function ainda não foi implementado.");
   }
-  parts.push(textPart);
 
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: { parts: parts },
-    });
-
-    if (response && response.text) {
-      return response.text.trim();
-    } else {
-      throw new Error("A resposta da API estava vazia ou em formato inesperado.");
-    }
-  } catch (error) {
-    console.error("Erro ao chamar a API Gemini para preenchimento:", error);
-    throw new Error("Falha ao preencher o modelo com o serviço de IA.");
-  }
+  return generateContent(prompt);
 }

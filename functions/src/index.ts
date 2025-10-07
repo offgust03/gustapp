@@ -1,30 +1,37 @@
-/**
- * Import function triggers from their respective submodules:
- *
- * import {onCall} from "firebase-functions/v2/https";
- * import {onDocumentWritten} from "firebase-functions/v2/firestore";
- *
- * See a full list of supported triggers at https://firebase.google.com/docs/functions
- */
-
+import {onCall} from "firebase-functions/v2/https";
 import {setGlobalOptions} from "firebase-functions";
+import {VertexAI} from "@google-cloud/vertexai";
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+setGlobalOptions({maxInstances: 10});
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+const PROJECT_ID = "gustavoapp-b9b70";
+const LOCATION = "us-central1";
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const vertex_ai = new VertexAI({project: PROJECT_ID, location: LOCATION});
+const model = vertex_ai.getGenerativeModel({
+  model: "gemini-1.5-flash-001",
+});
+
+exports.generateContent = onCall(async (request) => {
+  const {prompt} = request.data;
+
+  const req = {
+    contents: [{role: "user", parts: [{text: prompt}]}],
+  };
+
+  try {
+    const result = await model.generateContent(req);
+    const response = result.response;
+
+    if (response && response.candidates && response.candidates.length > 0 && response.candidates[0].content.parts.length > 0) {
+      const text = response.candidates[0].content.parts[0].text;
+      return {text: text ? text.trim() : ""};
+    } else {
+      console.error("Unexpected API response:", JSON.stringify(response, null, 2));
+      return {error: "The API response was empty or in an unexpected format."};
+    }
+  } catch (error) {
+    console.error("Error calling Vertex AI API:", error);
+    return {error: "Failed to communicate with the AI service."};
+  }
+});
